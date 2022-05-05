@@ -135,58 +135,55 @@ def imshow(img, mask, count=0):
 
 if __name__ == '__main__':
     # Directories
-    img_dir = "./dataset/imgs/"
-    mask_dir = "./dataset/masks/"
-    val_imgs_dir = "./dataset/val_imgs/"
-    val_masks_dir = "./dataset/val_masks/"
-    video_directory = "D:\\VIDEOS\\default_driving.mp4"
+	img_dir = "datasets/imgs"
+	mask_dir = "datasets/masks"
+	val_imgs_dir = "datasets/val_imgs"
+	val_masks_dir = "datasets/val_masks"
+	video_directory = "D:\\VIDEOS\\default_driving.mp4"
 
-    # Needed for training
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    BATCH_SIZE = 2
-    EPOCHS = 20
-    IMAGE_SIZE = 256
-    NUM_WORKERS = 4
-    PIN_MEM = True
-    SEED = 89
-    np.random.seed(SEED)
-    torch.manual_seed(SEED)
-    torch.backends.cudnn.benchmark = True
-    torch.cuda.empty_cache()
-
-    # Preprocess dataset
-    preprocess = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-    ])
-
-    # Video Prepreocess
-    video_preprocess =transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
-		])
+	# Needed for training
+	device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+	BATCH_SIZE = 2 
+	EPOCHS = 20
+	IMAGE_SIZE = 256
+	NUM_WORKERS = 4
+	PIN_MEM = True
+	SEED = 89
+	np.random.seed(SEED)
+	torch.manual_seed(SEED)
+	torch.backends.cudnn.benchmark = True
+	torch.cuda.empty_cache()
 
 
+	# Preprocess dataset
+	preprocess = transforms.Compose([
+		transforms.ToTensor(),
+		transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+	])
 
-		# Load the datasets needed.
-		# Shape: 3 x 256 x 256 image
-		trainset = SegDataset(img_dir, mask_dir, transform=preprocess)
-		print(trainset.shape)
-		train_loader = DataLoader(trainset, BATCH_SIZE, shuffle=True)
+	# Video Prepreocess
+	video_preprocess =transforms.Compose([
+				transforms.ToTensor(),
+				transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+				transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+	])
 
-    valset = SegDataset(val_imgs_dir, val_masks_dir, transform=preprocess)
-    val_loader = DataLoader(valset, BATCH_SIZE)
+	# Load Dataset needed
+	# shape 3x256x256 image
+	trainset = SegDataset(img_dir, mask_dir, transform=preprocess)
+	train_loader = DataLoader(trainset, BATCH_SIZE, num_workers=NUM_WORKERS, shuffle=True)
+	valset = SegDataset(val_imgs_dir, val_masks_dir, transform=preprocess)
+	val_loader = DataLoader(valset, BATCH_SIZE)
 
-    # Load Model
-    model = SegNetV2()
-    # Loss Function
-    loss_fn = nn.CrossEntropyLoss()
-    # Optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
+	# Load Model
+	model = SegnetV2()
+	# Loss Function
+	loss_fn = nn.CrossEntropyLoss()
+	# Optimizer
+	optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
 
-    # Train the model
-    train(model, device, train_loader, val_loader, loss_fn, optimizer, EPOCHS)
+	# Train the model
+	train(model, device, train_loader, val_loader, loss_fn, optimizer, EPOCHS)
 
-    # Visualize
-    visualize(video_directory, model, video_preprocess, device)
+	# Visualize
+	visualize(video_directory, model, video_preprocess, device)
