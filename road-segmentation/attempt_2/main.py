@@ -9,6 +9,13 @@ from dataset import SegDataset
 from network import SegnetV2
 import cv2
 
+	"""
+	Special thanks to Alan Tessier for making this tutorial and giving me 
+	a better understanding
+	https://www.youtube.com/watch?v=A69xdZZmvSs
+	"""
+
+
 
 def train(model, device, train_loader, val_loader, loss_fn, optimizer, epochs, load_model=False):
     """
